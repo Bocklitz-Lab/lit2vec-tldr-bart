@@ -1,0 +1,40 @@
+# configs/train_distilbart.yaml
+
+# ── Run / tracking ──────────────────────────────────────────────────────────────
+project_name: "lit2vec_tldr_bart"
+wandb_entity: null            # e.g. "your-team" or null for personal
+run_name: "lit2vec_distilbart_run"
+seed: 42
+
+# ── Data / model ───────────────────────────────────────────────────────────────
+dataset_id: "Bocklitz-Lab/lit2vec-tldr-bart-dataset"
+model_checkpoint: "sshleifer/distilbart-cnn-12-6"
+
+max_input_length: 1024
+max_target_length: 128
+
+# ── Paths (these match your script’s defaults) ─────────────────────────────────
+tokenized_cache_path: "./saved_data/cached_tokenized_data"
+checkpoint_dir: "./saved_data/checkpoints"
+final_model_dir: "./saved_data/final_model"
+evaluation_dir: "./evaluation"
+
+# ── Training ───────────────────────────────────────────────────────────────────
+train_batch_size: 4
+eval_batch_size: 4
+gradient_accumulation_steps: 4
+learning_rate: 2e-5
+num_train_epochs: 5
+fp16: auto                     # "auto" lets the script set fp16 if CUDA is available
+
+# ── Scheduling / logging ───────────────────────────────────────────────────────
+logging_steps: 500
+eval_steps: 1000
+save_steps: 1000
+save_total_limit: 2
+evaluation_strategy: "steps"
+save_strategy: "steps"
+logging_strategy: "steps"
+
+# ── Device (optional) ──────────────────────────────────────────────────────────
+# cuda_visible_devices: "0"    # uncomment to pin GPUs, or set via environment

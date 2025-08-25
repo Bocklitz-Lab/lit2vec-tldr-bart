@@ -1,0 +1,14 @@
+torch==2.4.1
+transformers==4.40.0
+nltk==3.8.1
+tqdm>=4.62.1
+evaluate==0.4.0
+datasets==2.19.1
+rouge-score==0.1.2
+wandb==0.17.0
+numpy==1.26.4
+accelerate>=0.21.0
+bert-extractive-summarizer==0.10.1
+spacy==3.7.2
+sumy==0.11.0
+bert-score==0.3.13
