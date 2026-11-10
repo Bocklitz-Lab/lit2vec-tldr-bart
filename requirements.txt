@@ -1,14 +1,29 @@
+# Training and evaluation (versions match the environment used for the released model)
 torch==2.4.1
 transformers==4.40.0
-nltk==3.8.1
-tqdm>=4.62.1
-evaluate==0.4.0
 datasets==2.19.1
-rouge-score==0.1.2
-wandb==0.17.0
-numpy==1.26.4
+evaluate==0.4.0
 accelerate>=0.21.0
-bert-extractive-summarizer==0.10.1
-spacy==3.7.2
-sumy==0.11.0
+rouge-score==0.1.2
+nltk==3.8.1
+numpy==1.26.4
+tqdm>=4.62.1
+wandb==0.17.0
+PyYAML==6.0.2
+
+# Baselines and plots in notebooks/02_eval_and_visualize.ipynb
 bert-score==0.3.13
+bert-extractive-summarizer==0.10.1
+sumy==0.11.0
+spacy==3.7.2
+pandas==2.3.2
+matplotlib==3.10.5
+
+# Dataset exploration in notebooks/01_explore_dataset.ipynb
+seaborn==0.13.2
+
+# Optional: scripts/export_model.sh (ONNX export and check)
+# onnx
+# onnxruntime
+# Optional: the PEGASUS baseline in notebook 02
+# sentencepiece

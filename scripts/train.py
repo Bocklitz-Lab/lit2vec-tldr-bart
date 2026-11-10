@@ -1,3 +1,8 @@
+"""Original single-file training script of the released model.
+
+src/train.py is the configurable version of the same procedure (see the README).
+To train on a particular GPU, set CUDA_VISIBLE_DEVICES in the shell.
+"""
 import os
 from tqdm import tqdm
 
@@ -16,7 +21,7 @@ import wandb
 
 # ==== CONFIGURATION ====
 PROJECT_NAME = "distilbart_cnn_summarizer"
-WANDB_ENTITY = None   # 👈 or your W&B team name
+WANDB_ENTITY = None   # or your W&B team name
 
 DATASET_ID = "Bocklitz-Lab/lit2vec-tldr-bart-dataset"
 TOKENIZED_CACHE_PATH = "./saved_data/cached_tokenized_data"
@@ -28,9 +33,8 @@ MAX_INPUT_LENGTH = 1024
 MAX_TARGET_LENGTH = 128
 
 # ==== DEVICE ====
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-print(f"✅ Using device: {device}")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
 
 # ==== WANDB INIT ====
 wandb.init(
@@ -52,7 +56,7 @@ wandb.init(
 )
 
 # ==== STEP 1: LOAD DATASET FROM HF ====
-print("📄 Loading dataset from Hugging Face Hub...")
+print("Loading dataset from Hugging Face Hub...")
 dataset = load_dataset(DATASET_ID)
 
 print(dataset)
@@ -63,11 +67,11 @@ model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_CHECKPOINT)
 
 # ==== STEP 3: TOKENIZE OR LOAD CACHE ====
 if os.path.exists(TOKENIZED_CACHE_PATH):
-    print("🔁 Loading tokenized dataset from disk...")
+    print("Loading tokenized dataset from disk...")
     from datasets import load_from_disk
     tokenized_datasets = load_from_disk(TOKENIZED_CACHE_PATH)
 else:
-    print("📄 Tokenizing dataset...")
+    print("Tokenizing dataset...")
 
     def preprocess_function(examples):
         model_inputs = tokenizer(
@@ -97,7 +101,7 @@ else:
 
     os.makedirs(os.path.dirname(TOKENIZED_CACHE_PATH), exist_ok=True)
     tokenized_datasets.save_to_disk(TOKENIZED_CACHE_PATH)
-    print(f"✅ Tokenized dataset saved to {TOKENIZED_CACHE_PATH}")
+    print(f"Tokenized dataset saved to {TOKENIZED_CACHE_PATH}")
 
 # ==== STEP 4: DATA COLLATOR ====
 data_collator = DataCollatorForSeq2Seq(tokenizer=tokenizer, model=model)
@@ -178,23 +182,23 @@ if os.path.isdir(CHECKPOINT_DIR):
         last_checkpoint = max(checkpoints, key=os.path.getctime)
 
 if last_checkpoint:
-    print(f"🚀 Resuming from checkpoint: {last_checkpoint}")
+    print(f"Resuming from checkpoint: {last_checkpoint}")
     trainer.train(resume_from_checkpoint=last_checkpoint)
 else:
-    print("🚀 Starting training from scratch...")
+    print("Starting training from scratch...")
     trainer.train()
 
 # ==== STEP 9: SAVE FINAL MODEL ====
-print("💾 Saving final model...")
+print("Saving final model...")
 os.makedirs(FINAL_MODEL_DIR, exist_ok=True)
 trainer.save_model(FINAL_MODEL_DIR)
 tokenizer.save_pretrained(FINAL_MODEL_DIR)
-print(f"✅ Final model saved to {FINAL_MODEL_DIR}")
+print(f"Final model saved to {FINAL_MODEL_DIR}")
 
 # ==== STEP 10: FINAL TEST EVALUATION ====
-print("🧪 Running final evaluation on test split...")
+print("Running final evaluation on test split...")
 test_metrics = trainer.evaluate(eval_dataset=tokenized_datasets["test"], metric_key_prefix="test")
-print("📊 Test metrics:", test_metrics)
+print("Test metrics:", test_metrics)
 
 # log to W&B as well
 wandb.log(test_metrics)

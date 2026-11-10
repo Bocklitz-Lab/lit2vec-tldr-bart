@@ -1,4 +1,4 @@
-# src/lit2vec_tldr/metrics.py
+# src/metrics.py
 
 import nltk
 import evaluate

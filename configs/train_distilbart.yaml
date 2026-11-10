@@ -1,7 +1,10 @@
 # configs/train_distilbart.yaml
+# Training settings of the released model. Used by:  python src/train.py --config configs/train_distilbart.yaml
+# Any key that is left out falls back to the default in src/train.py.
 
 # ── Run / tracking ──────────────────────────────────────────────────────────────
 project_name: "lit2vec_tldr_bart"
+use_wandb: true               # false: no Weights & Biases logging (same as --no_wandb)
 wandb_entity: null            # e.g. "your-team" or null for personal
 run_name: "lit2vec_distilbart_run"
 seed: 42
@@ -13,7 +16,7 @@ model_checkpoint: "sshleifer/distilbart-cnn-12-6"
 max_input_length: 1024
 max_target_length: 128
 
-# ── Paths (these match your script’s defaults) ─────────────────────────────────
+# ── Paths ──────────────────────────────────────────────────────────────────────
 tokenized_cache_path: "./saved_data/cached_tokenized_data"
 checkpoint_dir: "./saved_data/checkpoints"
 final_model_dir: "./saved_data/final_model"
@@ -35,6 +38,13 @@ save_total_limit: 2
 evaluation_strategy: "steps"
 save_strategy: "steps"
 logging_strategy: "steps"
+
+# ── Options that change the data or the objective ──────────────────────────────
+# The values below reproduce the released model (see "Notes on the released model" in the README).
+mask_label_padding: false      # true: padded label positions are ignored by the loss
+drop_empty_pairs: false        # true: drop records without an abstract or without a summary
+# max_train_samples: 64        # debugging only: use the first N records per split
+# max_eval_samples: 32
 
 # ── Device (optional) ──────────────────────────────────────────────────────────
 # cuda_visible_devices: "0"    # uncomment to pin GPUs, or set via environment

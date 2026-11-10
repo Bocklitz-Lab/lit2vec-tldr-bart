@@ -12,8 +12,8 @@ RUN_NAME="lit2vec_distilbart_run"
 
 mkdir -p "$LOG_DIR"
 
-echo "🚀 Starting training with config: $CONFIG_FILE"
-echo "📂 Logs will be saved in $LOG_DIR/train.log"
+echo "Starting training with config: $CONFIG_FILE"
+echo "Logs will be saved in $LOG_DIR/train.log"
 
 # === Run training ===
 python3 "$PYTHON_SCRIPT" \

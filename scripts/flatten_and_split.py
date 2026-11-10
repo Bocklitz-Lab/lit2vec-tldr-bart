@@ -1,3 +1,16 @@
+"""Flatten the annotated records and split them into train / validation / test JSONL files.
+
+Input: one JSON file with a list of records. Each record has `corpus_id`, `abstract`,
+`summary` and a `reduced_metadata` object (doi, title, authors, venue, year,
+fields_of_study, publication_date, url and license with `license`, `publisher`, `oa_pdf`).
+
+Output: train.jsonl, validation.jsonl and test.jsonl. The split is random with a fixed seed
+and uses the ratios 90% / 5% / 5%. For the 19,992 records of the released dataset this gives
+17,992 / 999 / 1,001 records.
+
+Note: `fields_of_study` keeps one entry per source, so a field can appear more than once, and
+`license_url` is the open-access PDF link (`oa_pdf`), not a link to the license text.
+"""
 import json
 import random
 import argparse
@@ -68,7 +81,7 @@ def main(args):
     write_jsonl(val_data, output_dir / "validation.jsonl")
     write_jsonl(test_data, output_dir / "test.jsonl")
 
-    print(f"✅ Written {len(train_data)} train, {len(val_data)} validation, {len(test_data)} test records to {output_dir}")
+    print(f"Written {len(train_data)} train, {len(val_data)} validation, {len(test_data)} test records to {output_dir}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Flatten and split JSON dataset")

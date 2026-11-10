@@ -1,4 +1,4 @@
-# src/lit2vec_tldr/preprocess.py
+# src/preprocess.py
 
 from __future__ import annotations
 from typing import Callable, Dict, Iterable, List, Optional, Union
@@ -27,13 +27,20 @@ def get_preprocess_function(
     max_target_length: int = 128,
     padding: str = "max_length",  # "max_length" or "longest"
     truncation: bool = True,
+    mask_label_padding: bool = False,
 ) -> Callable[[Dict[str, List[object]]], Dict[str, List[List[int]]]]:
     """
     Returns a batched preprocessing function for Seq2Seq tokenization.
 
     Produces:
       - input_ids, attention_mask for inputs
-      - labels for targets (DataCollatorForSeq2Seq will mask pad -> -100)
+      - labels for targets
+
+    Note on label padding: with padding="max_length" the labels are already padded
+    to max_target_length with the tokenizer's pad id, and DataCollatorForSeq2Seq does
+    not change them, so the loss is also computed on the padding positions. This is how
+    the released model was trained, so it is the default. Set mask_label_padding=True to
+    replace the pad ids in the labels with -100 so that the loss ignores them.
 
     Args:
         tokenizer: HF tokenizer for the model.
@@ -43,6 +50,7 @@ def get_preprocess_function(
         max_target_length: max tokens for targets.
         padding: "max_length" or "longest".
         truncation: whether to truncate sequences.
+        mask_label_padding: replace pad ids in the labels with -100 (see above).
 
     Returns:
         A function suitable for Dataset.map(batched=True).
@@ -62,13 +70,18 @@ def get_preprocess_function(
 
         # Tokenize targets (labels)
         labels = tokenizer(
-            text_target=targets,            # ✅ modern API (no deprecation warnings)
+            text_target=targets,
             max_length=max_target_length,
             padding=padding,
             truncation=truncation,
         )
 
-        model_inputs["labels"] = labels["input_ids"]
+        label_ids = labels["input_ids"]
+        if mask_label_padding:
+            pad_id = tokenizer.pad_token_id
+            label_ids = [[(-100 if t == pad_id else t) for t in seq] for seq in label_ids]
+
+        model_inputs["labels"] = label_ids
         return model_inputs
 
     return _preprocess
@@ -86,6 +99,7 @@ def tokenize_dataset(
     truncation: bool = True,
     remove_columns: Optional[Iterable[str]] = None,
     num_proc: Optional[int] = None,
+    mask_label_padding: bool = False,
 ) -> DatasetDict | Dataset:
     """
     Applies seq2seq tokenization to a Dataset or DatasetDict.
@@ -97,6 +111,7 @@ def tokenize_dataset(
         max_input_length, max_target_length, padding, truncation: tokenization params.
         remove_columns: columns to drop after tokenization. If None, auto-drop input/target.
         num_proc: optional multiprocessing workers for `.map`.
+        mask_label_padding: replace pad ids in the labels with -100.
 
     Returns:
         Tokenized Dataset / DatasetDict containing input_ids, attention_mask, labels.
@@ -109,6 +124,7 @@ def tokenize_dataset(
         max_target_length=max_target_length,
         padding=padding,
         truncation=truncation,
+        mask_label_padding=mask_label_padding,
     )
 
     # Auto-remove text columns if not specified

@@ -1,4 +1,4 @@
-# src/lit2vec_tldr/utils.py
+# src/utils.py
 
 import os
 import random
@@ -35,7 +35,7 @@ def set_seed(seed: int = 42) -> None:
     torch.backends.cudnn.benchmark = False
     os.environ["PYTHONHASHSEED"] = str(seed)
 
-    print(f"🔒 Reproducibility seed set to {seed}")
+    print(f"Reproducibility seed set to {seed}")
 
 
 # -----------------
